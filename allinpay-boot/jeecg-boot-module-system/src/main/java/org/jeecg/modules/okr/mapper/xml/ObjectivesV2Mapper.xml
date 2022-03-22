@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.okr.mapper.ObjectivesV2Mapper">
+
+    <select id="getDepartById" parameterType="java.lang.String" resultType="org.jeecg.modules.system.entity.SysDepart">
+        select * from sys_depart where id=#{id}
+    </select>
+
+
+    <select id="getObjPage" resultMap="objPageMap">
+        select
+        o.id as oid,
+        (select d.depart_name from sys_depart d where d.id=o.sys_depart) as sys_depart,
+        o.objectives as objectives,
+        o.start_time as start_time,
+        o.end_time as end_time,
+        o.percent as percent,
+        o.charge_person as charge_person,
+        o.`comment` as `comment`,
+        k.id as kid,
+        k.content as content,
+        k.unit as unit,
+        k.finished_amount as finished_amount,
+        k.target_amount as target_amount,
+        k.assign_user as assign_user,
+        k.confidence as confidence,
+        k.ranking as ranking,
+        k.remark as remark
+        from objectives_v2 o,key_results_v2 k
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="queryAllPlanRole" resultType="org.jeecg.modules.okr.entity.UserRole" parameterType="java.lang.String">
+        select * from sys_user_role
+        where sys_user_role.user_id=(select sys_user.id from sys_user where sys_user.username=#{username})
+        and sys_user_role.role_id=(select sys_role.id from sys_role where sys_role.role_code='allplan')
+    </select>
+
+
+    <resultMap id="objPageMap" type="org.jeecg.modules.okr.vo.ObjectivesV2Page">
+        <result property="id" column="oid"/>
+        <result property="sysDepart" column="sys_depart"/>
+        <result property="objectives" column="objectives"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="percent" column="percent"/>
+        <result property="chargePerson" column="charge_person"/>
+        <result property="comment" column="comment"/>
+
+
+        <collection property="keyResultsList" javaType="java.util.List" ofType="org.jeecg.modules.okr.entity.ObjectivesV2">
+            <result property="id" column="kid"/>
+            <result property="content" column="content"/>
+            <result property="unit" column="unit"/>
+            <result property="finishedAmount" column="finished_amount"/>
+            <result property="targetAmount" column="target_amount"/>
+            <result property="assignUser" column="assign_user"/>
+            <result property="confidence" column="confidence"/>
+            <result property="ranking" column="ranking"/>
+            <result property="remark" column="remark"/>
+        </collection>
+    </resultMap>
+</mapper>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.home.mapper.DayTrxStatV2Mapper">
+
+<!--    首页杂项数据-->
+    <select id="queryData" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.entity.HomeData">
+        select round(sum(s.tr_money)/10000,2) as totalTradingMoney,
+        round(avg(s.tr_money)) as avgDayTradingMoney,
+        round(sum(s.co_income)/10000,2) as totalIncome,
+        round(avg(s.co_income)) as avgDayIncome,
+        round(sum(s.tr_number)/10000,2) as totalNum,
+        round(avg(s.tr_number)) as avgDayNum
+        from
+        (select sum(transaction_money) as tr_money,sum(company_income) as co_income,sum(transaction_number) as tr_number
+        from day_trx_stat_v2
+        where transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        group by transaction_date
+        ) s
+    </select>
+
+<!--    面积图-->
+    <resultMap id="areaList" type="org.jeecg.modules.home.entity.ChartData" >
+        <result property="transactionDate" column="transactionDate"/>
+        <result property="totalTradingMoney" column="totalTradingMoney"/>
+        <result property="totalIncome" column="totalIncome"/>
+        <result property="totalNum" column="totalNum"/>
+    </resultMap>
+    <select id="areaData" resultMap="areaList">
+        select date_format(transaction_date,"%Y-%m-%d") as transactionDate,
+        round(sum(transaction_money)/10000,2) as totalTradingMoney,
+        round(sum(company_income)/10000,2) as totalIncome,
+        round(sum(transaction_number)/10000,2) as totalNum
+        from day_trx_stat_v2
+        where date_sub(curdate(),interval 7 day)&lt;=date(transaction_date)
+        group by transaction_date order by transaction_date;
+    </select>
+
+<!--    OKR完成度-->
+    <select id="getPercent" parameterType="java.lang.String" resultType="org.jeecg.modules.home.entity.OkrProgress">
+        select round(count(q.is_new)*100/50,2) as newAdd,
+        round(day_trx.tradingNum,2) as tradingNum,
+        round(day_trx.finishOfTrading,2) as finishOfTrading,
+        round(day_trx.finishOfIncome,2) as finishOfIncome
+        from quality_merchant q,(
+        select sum(d.transaction_number)/45000 as tradingNum,
+        sum(d.transaction_money)/20000000 as finishOfTrading,
+        sum(d.company_income)/50000 as finishOfIncome
+        from day_trx_stat_v2 d
+        where transaction_date between #{startTime} and #{endTime}) day_trx
+        where q.is_new='0'
+    </select>
+
+    <!--    存量优质商户收入条形图-->
+    <select id="getTrxStatByMonthOther" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.playload.BarData" >
+        SELECT  TRX_MONTH as month, round(SUM(company_income)/10000,2) AS money
+        FROM
+        (
+        SELECT id,
+        left(transaction_date,  6) AS TRX_MONTH,
+        company_income
+        FROM day_trx_stat_v2
+        WHERE transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        and industry_type='1'
+        ) mm
+        GROUP BY TRX_MONTH
+        ORDER BY TRX_MONTH
+    </select>
+
+    <!--    新增优质商户收入条形图-->
+    <select id="getFeeStatByMonthOther" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.playload.BarData" >
+        SELECT  TRX_MONTH as month, round(SUM(company_income)/10000,2) AS money
+        FROM
+        (
+        SELECT id,
+        left(transaction_date,  6) AS TRX_MONTH,
+        company_income
+        FROM day_trx_stat_v2
+        WHERE transaction_date between '202101' and '20211231'
+        and industry_type='0'
+        ) mm
+        GROUP BY TRX_MONTH
+        ORDER BY TRX_MONTH
+    </select>
+
+    <!-- 存量优质商户收入排行榜 -->
+    <select id="getTrxTopProject" parameterType="java.lang.String" resultType="org.jeecg.modules.home.playload.TopProject" >
+        select t.name as name,round(sum(t.total)/10000,2) as total from
+        (
+        select mm.merchant_name as name,a.amount as total
+        from(
+        select d.merchant_code,
+        d.company_income as amount
+        from day_trx_stat_v2 d
+        where industry_type='1' and d.transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        -- group by d.merchant_code
+        ) a,(
+        select m.merchant_name as merchant_name,
+        m.merchant_code as merchant_code
+        from quality_merchant m
+        ) mm
+        where a.merchant_code=mm.merchant_code
+        ) t
+        group by t.name
+        order by total desc
+        limit 7
+    </select>
+
+    <!-- 新增优质商户收入排行榜 -->
+    <select id="getFeeTopProject" parameterType="java.lang.String" resultType="org.jeecg.modules.home.playload.TopProject" >
+        select t.name as name,round(sum(t.total)/10000,2) as total from
+        (
+        select mm.merchant_name as name,a.amount as total
+        from(
+        select d.merchant_code,
+        d.company_income as amount
+        from day_trx_stat_v2 d
+        where industry_type='0' and d.transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        -- group by d.merchant_code
+        ) a,(
+        select m.merchant_name as merchant_name,
+        m.merchant_code as merchant_code
+        from quality_merchant m
+        ) mm
+        where a.merchant_code=mm.merchant_code
+        ) t
+        group by t.name
+        order by total desc
+        limit 7
+    </select>
+
+    <select id="barDataDic" resultType="java.lang.String">
+        select item_value from ynallinpayboot.sys_dict_item where dict_id=
+        (select id from sys_dict where dict_code='bar_data_dic')
+    </select>
+
+
+
+<!--    首页顶部滚动文字数据-->
+    <select id="marqueeData" parameterType="java.lang.String" resultType="org.jeecg.modules.home.entity.MarqueeData">
+        select count(q.is_new) as newAdd,
+               50 as newAddAll,
+               round(count(q.is_new)*100/50,2) as newAddPercent,
+               round(day_trx.tradingNum,2) as tradingNum,
+               round(day_trx.tradingNumAll,2) as tradingNumAll,
+               round(day_trx.tradingNumPercent,2) as tradingNumPercent,
+               round(day_trx.finishOfTrading,2) as finishOfTrading,
+               round(day_trx.finishOfTradingAll,2) as finishOfTradingAll,
+               round(day_trx.finishOfTradingPercent,2) as finishOfTradingPercent,
+               round(day_trx.finishOfIncome,2) as finishOfIncome,
+               round(day_trx.finishOfIncomeAll,2) as finishOfIncomeAll,
+               round(day_trx.finishOfIncomePercent,2) as finishOfIncomePercent
+        from quality_merchant q,(
+            select round(sum(d.transaction_number)/10000) as tradingNum,
+                   450 as tradingNumAll,
+                   sum(d.transaction_number)/45000 as tradingNumPercent,
+                   round(sum(d.transaction_money)/10000) as finishOfTrading,
+                   200000 as finishOfTradingAll,
+                   sum(d.transaction_money)/20000000 as finishOfTradingPercent,
+                   round(sum(d.company_income)/10000) as finishOfIncome,
+                   500 as finishOfIncomeAll,
+                   sum(d.company_income)/50000 as finishOfIncomePercent
+            from day_trx_stat_v2 d
+            where transaction_date between #{startTime} and #{endTime}) day_trx
+        where q.is_new='0'
+    </select>
+</mapper>

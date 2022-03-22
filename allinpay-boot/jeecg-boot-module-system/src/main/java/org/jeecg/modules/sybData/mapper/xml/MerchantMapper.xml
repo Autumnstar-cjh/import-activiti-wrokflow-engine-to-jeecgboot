@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.sybData.mapper.MerchantMapper">
+
+
+    <select id="queryMerchantBankInfo" parameterType="org.jeecg.modules.sybData.entity.Merchant" resultType="org.jeecg.modules.sybData.entity.Merchant">
+
+        select * from TLZFMIS.dbo.收银宝商户
+        
+    </select>
+</mapper>

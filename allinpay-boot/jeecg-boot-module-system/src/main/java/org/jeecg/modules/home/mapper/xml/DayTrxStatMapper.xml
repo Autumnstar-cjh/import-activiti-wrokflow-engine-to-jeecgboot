@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.home.mapper.DayTrxStatMapper">
+
+<!--    首页杂项数据-旅游-->
+    <select id="queryData" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.entity.HomeData">
+            select round(sum(s.tr_money)/10000,2) as totalTradingMoney,
+            round(avg(s.tr_money)) as avgDayTradingMoney,
+            round(sum(s.co_income)/10000,2) as totalIncome,
+            round(avg(s.co_income)) as avgDayIncome,
+            round(sum(s.tr_number)/10000,2) as totalNum,
+            round(avg(s.tr_number)) as avgDayNum
+        from
+            (select sum(transaction_money) as tr_money,sum(company_income) as co_income,sum(transaction_number) as tr_number
+            from day_trx_stat
+            where transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+            and industry_type='1'
+            group by transaction_date
+            ) s
+    </select>
+    <!--    首页杂项数据-四个产业-->
+    <select id="queryDataOther" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.entity.HomeData">
+        select round(sum(s.tr_money)/10000,2) as totalTradingMoney,
+        round(avg(s.tr_money)) as avgDayTradingMoney,
+        round(sum(s.co_income)/10000,2) as totalIncome,
+        round(avg(s.co_income)) as avgDayIncome,
+        round(sum(s.tr_number)/10000,2) as totalNum,
+        round(avg(s.tr_number)) as avgDayNum
+        from
+        (select sum(transaction_money) as tr_money,sum(company_income) as co_income,sum(transaction_number) as tr_number
+        from day_trx_stat
+        where transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        and industry_type='0'
+        group by transaction_date
+        ) s
+    </select>
+
+
+<!--    面积图-->
+    <resultMap id="areaList" type="org.jeecg.modules.home.entity.ChartData" >
+        <result property="transactionDate" column="transactionDate"/>
+        <result property="totalTradingMoney" column="totalTradingMoney"/>
+        <result property="totalIncome" column="totalIncome"/>
+        <result property="totalNum" column="totalNum"/>
+    </resultMap>
+    <select id="areaData" resultMap="areaList">
+        select date_format(transaction_date,"%Y-%m-%d") as transactionDate,
+        round(sum(transaction_money)/10000,2) as totalTradingMoney,
+        round(sum(company_income)/10000,2) as totalIncome,
+        round(sum(transaction_number)/10000,2) as totalNum
+        from day_trx_stat
+        where date_sub(curdate(),interval 7 day)&lt;=date(transaction_date)
+        <if test="dataType=='tourismIndustry'">
+            and industry_type='1'
+        </if>
+        <if test="dataType=='fourIndustry'">
+            and industry_type='0'
+        </if>
+        group by transaction_date order by transaction_date;
+    </select>
+
+
+<!--    按月统计交易-旅游-->
+    <select id="getTrxStatByMonth" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.playload.BarData" >
+        SELECT  TRX_MONTH as month, round(SUM(transaction_money)/10000,2) AS money
+        FROM
+        (
+        SELECT id,
+            left(transaction_date,  6) AS TRX_MONTH,
+            merchant_code,
+            terminal_code,
+            transaction_money,
+            transaction_number,
+            company_income,
+            transaction_type
+        FROM day_trx_stat
+        WHERE transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        and industry_type='1'
+        ) mm
+        GROUP BY TRX_MONTH
+        ORDER BY TRX_MONTH
+    </select>
+    <!--    按月统计交易-四个产业-->
+    <select id="getTrxStatByMonthOther" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.playload.BarData" >
+        SELECT  TRX_MONTH as month, round(SUM(transaction_money)/10000,2) AS money
+        FROM
+        (
+        SELECT id,
+        left(transaction_date,  6) AS TRX_MONTH,
+        merchant_code,
+        terminal_code,
+        transaction_money,
+        transaction_number,
+        company_income,
+        transaction_type
+        FROM day_trx_stat
+        WHERE transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        and industry_type='0'
+        ) mm
+        GROUP BY TRX_MONTH
+        ORDER BY TRX_MONTH
+    </select>
+
+
+<!--    按月统计收入-旅游-->
+    <select id="getFeeStatByMonth" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.playload.BarData" >
+        SELECT  TRX_MONTH as month, round(SUM(company_income)/10000,2) AS money
+        FROM
+        (
+            SELECT id,
+            left(transaction_date,  6) AS TRX_MONTH,
+            merchant_code,
+            terminal_code,
+            transaction_money,
+            transaction_number,
+            company_income,
+            transaction_type
+        FROM day_trx_stat
+        WHERE transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        and industry_type='1'
+        ) mm
+        GROUP BY TRX_MONTH
+        ORDER BY TRX_MONTH
+    </select>
+    <!--    按月统计收入-四个产业-->
+    <select id="getFeeStatByMonthOther" parameterType="org.jeecg.modules.home.entity.PeriodTime" resultType="org.jeecg.modules.home.playload.BarData" >
+        SELECT  TRX_MONTH as month, round(SUM(company_income)/10000,2) AS money
+        FROM
+        (
+        SELECT id,
+        left(transaction_date,  6) AS TRX_MONTH,
+        merchant_code,
+        terminal_code,
+        transaction_money,
+        transaction_number,
+        company_income,
+        transaction_type
+        FROM day_trx_stat
+        WHERE transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+        and industry_type='0'
+        ) mm
+        GROUP BY TRX_MONTH
+        ORDER BY TRX_MONTH
+    </select>
+
+    <!-- 项目交易排行榜 -->
+    <select id="getTrxTopProject" parameterType="java.lang.String" resultType="org.jeecg.modules.home.playload.TopProject" >
+        SELECT p.project_name as name, round(ps.amount/10000,2) as total
+            FROM (
+            SELECT m.project_id, SUM(ss.amount) as amount
+                FROM (
+                SELECT  s.merchant_code,  SUM(s.transaction_money) AS amount
+                from  day_trx_stat s
+                where s.transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+                GROUP BY  s.merchant_code
+                ) ss
+            LEFT JOIN merchant m
+            ON ss.merchant_code = m.code
+            GROUP BY m.project_id
+            ) ps
+        LEFT JOIN project_info p
+        ON ps.project_id =  p.id
+        ORDER BY ps.amount DESC
+        LIMIT 7
+    </select>
+
+    <!-- 项目收入排行榜 -->
+    <select id="getFeeTopProject" parameterType="java.lang.String" resultType="org.jeecg.modules.home.playload.TopProject" >
+     SELECT p.project_name as name, round(ps.amount/10000,2) as total
+        FROM (
+            SELECT m.project_id, SUM(ss.amount) AS amount
+            FROM (
+                SELECT  s.merchant_code,  SUM(s.company_income) AS amount
+                from  day_trx_stat s
+                where s.transaction_date between #{periodTime.startTime} and #{periodTime.endTime}
+                GROUP BY  s.merchant_code
+            ) ss
+            LEFT JOIN merchant m
+            ON ss.merchant_code = m.code
+            GROUP BY m.project_id
+        ) ps
+        LEFT JOIN project_info p
+        ON ps.project_id =  p.id
+        ORDER BY ps.amount DESC
+        LIMIT 7
+
+    </select>
+</mapper>

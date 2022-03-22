@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.email.mapper.EmailMapper">
+
+    <resultMap id="departMap" type="org.jeecg.modules.email.entity.SysDepart">
+        <result property="id" column="sdId"/>
+        <result property="departName" column="sdDepartName"/>
+        <collection property="objectivesList" resultMap="emailData"/>
+    </resultMap>
+    
+    <resultMap id="emailData" type="org.jeecg.modules.email.entity.Objectives">
+        <result property="id" column="oId"/>
+        <result property="sysDepart" column="sysDepart"/>
+        <result property="objectives" column="objectives"/>
+        <result property="startTime" column="oStartTime"/>
+        <result property="endTime" column="oEndTime"/>
+        <result property="chargePerson" column="chargePerson"/>
+        
+        <collection property="keyResults" javaType="java.util.List" ofType="org.jeecg.modules.email.entity.KeyResults">
+            <result property="id" column="kId"/>
+            <result property="content" column="content"/>
+            <result property="confidence" column="confidence"/>
+            <result property="ranking" column="ranking"/>
+        </collection>
+    </resultMap>
+
+
+<!--    查询条件：本季度、未完成-->
+    <select id="getEmailContent" resultMap="departMap">
+        select sd.id as sdId,sd.depart_name sdDepartName ,o.id as oId,o.sys_depart as sysDepart,o.objectives as objectives,o.start_time as oStartTime,o.end_time as oEndTime,o.charge_person as chargePerson,
+        k.id as kId,k.content as content,k.confidence as confidence,k.ranking as ranking
+        from sys_depart sd, objectives_v2 o,key_result_v2 k
+        where o.percent  &lt; 1 and (QUARTER(o.start_time) = QUARTER(NOW()) or QUARTER(o.end_time) = QUARTER(NOW())) and k.obj_id=o.id and o.sys_depart=sd.id
+        order by sd.depart_order desc
+    </select>
+
+
+    <resultMap id="getPlansMap" type="org.jeecg.modules.email.entity.WorkPlan">
+        <result property="id" column="wId"/>
+        <result property="title" column="title"/>
+        <result property="person" column="person"/>
+        <result property="startTime" column="wStartTime"/>
+        <result property="endTime" column="wEndTime"/>
+        <result property="priority" column="priority"/>
+        <result property="associatedTarget" column="associatedTarget"/>
+        <result property="completedSituation" column="completedSituation"/>
+        <result property="status" column="status"/>
+    </resultMap>
+    <select id="getPlans" resultMap="getPlansMap">
+        select w.id as wId,w.title as title,w.person as person,w.start_time as wStartTime,w.end_time as wEndTime,w.priority as priority,
+            w.associated_target as associatedTarget,w.completed_situation as completedSituation,w.status as status
+        from work_plan_v2 w
+        where w.associated_target=#{oId}
+        order by w.priority asc
+    </select>
+
+<!--    查询邮件接受者列表-->
+    <select id="querySendEmail" resultType="org.jeecg.modules.system.entity.SysUser">
+        select sys_user.* from sys_user_role,sys_user where sys_user_role.role_id = (select sys_role.id from sys_role where sys_role.role_code='sendEmail') and sys_user_role.user_id = sys_user.id
+    </select>
+<!--    查询邮件抄送者列表-->
+    <select id="queryCopyEmail" resultType="org.jeecg.modules.system.entity.SysUser">
+        select sys_user.* from sys_user_role,sys_user where sys_user_role.role_id = (select sys_role.id from sys_role where sys_role.role_code='copyEmail') and sys_user_role.user_id = sys_user.id
+    </select>
+</mapper>

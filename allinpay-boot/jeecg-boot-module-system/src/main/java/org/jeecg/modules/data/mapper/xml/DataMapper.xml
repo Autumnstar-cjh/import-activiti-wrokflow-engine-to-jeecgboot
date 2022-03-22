@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.data.mapper.DataMapper">
+
+<!--	环比-最近一个月环比交易查询-->
+	<select id="getLastMomData" resultType="org.jeecg.modules.data.entity.MomData">
+		select [key],trans_date as transDate,merchant_code as merchantCode,merchant_name as merchantName,
+		expand_people as expandPeople, belongs_to as belongsTo, amount,mom_amount as momAmount,mom_rate as momRate
+
+		from [TLZFMIS].[dbo].[mom_data]
+		<choose>
+			<when test="merchantCode != '' and mom == ''">where rowNum = 1 and merchant_code = #{merchantCode}</when>
+			<when test="merchantCode == '' and mom != ''">where trans_date = #{mom}</when>
+			<when test="merchantCode != '' and mom != ''">where merchant_code = #{merchantCode} and trans_date = #{mom}</when>
+			<otherwise>where row_num = 1</otherwise>
+		</choose>
+
+		order by momRate desc,amount desc
+	</select>
+
+<!--	月环比-根据商户号查询环比交易，除去最近一个月的数据-->
+	<select id="getMomData" resultType="org.jeecg.modules.data.entity.MomData" parameterType="java.lang.String">
+		select [key],trans_date as transDate,merchant_code as merchantCode,merchant_name as merchantName,
+		expand_people as expandPeople, belongs_to as belongsTo, amount,mom_amount as momAmount,mom_rate as momRate
+		from [TLZFMIS].[dbo].[mom_data] where row_num > 1 and merchant_code = #{merchantCode}
+		<if test="mom != '' and mom != null">and trans_date &lt; #{mom}</if>
+	</select>
+
+<!--	周环比-最近7天环比交易查询-->
+	<select id="getWeekData" resultType="org.jeecg.modules.data.entity.WeekData" parameterType="java.lang.String">
+		select ROW_NUMBER() OVER(ORDER BY r.amount desc) as 'key',r.* from(
+		select merchant_code,merchant_name,expand_people,belongs_to,
+		sum(amount) as amount,sum(week_amount) as week_amount,
+		case when floor(sum(week_amount))=0 then 100 else cast(round((sum(amount)-sum(week_amount))*100/sum(week_amount),2) as numeric(20,2)) end as week_rate
+		from [TLZFMIS].[dbo].[week_data]
+		<choose>
+			<when test="merchantCode != '' and expandPeople == '' and belongsTo == ''">
+				where merchant_code = #{merchantCode}
+				group by merchant_code,merchant_name,expand_people,belongs_to) r order by week_rate asc,amount desc
+			</when>
+			<when test="merchantCode != '' and expandPeople != '' and belongsTo == ''">
+				where merchant_code = #{merchantCode} and expand_people like N'%'+#{expandPeople}+'%'
+				group by merchant_code,merchant_name,expand_people,belongs_to) r order by week_rate asc,amount desc
+			</when>
+			<when test="merchantCode != '' and expandPeople == '' and belongsTo != ''">
+				where merchant_code = #{merchantCode} and belongs_to like N'%'+#{belongsTo}+'%'
+				group by merchant_code,merchant_name,expand_people,belongs_to) r order by week_rate asc,amount desc
+			</when>
+			<when test="merchantCode == '' and expandPeople != '' and belongsTo == ''">
+				where expand_people like N'%'+#{expandPeople}+'%'
+				group by merchant_code,merchant_name,expand_people,belongs_to) r order by week_rate asc,amount desc
+			</when>
+			<when test="merchantCode == '' and expandPeople != '' and belongsTo != ''">
+				where expand_people like N'%'+#{expandPeople}+'%' and belongs_to like N'%'+#{belongsTo}+'%'
+				group by merchant_code,merchant_name,expand_people,belongs_to) r order by week_rate asc,amount desc
+			</when>
+			<when test="merchantCode == '' and expandPeople == '' and belongsTo != ''">
+				where belongs_to like N'%'+#{belongsTo}+'%'
+				group by merchant_code,merchant_name,expand_people,belongs_to) r order by week_rate asc,amount desc
+			</when>
+			<when test="merchantCode != '' and expandPeople != '' and belongsTo != ''">
+				where merchant_code = #{merchantCode} and expand_people like N'%'+#{expandPeople}+'%' and belongs_to like N'%'+#{belongsTo}+'%'
+				group by merchant_code,merchant_name,expand_people,belongs_to) r order by week_rate asc,amount desc
+			</when>
+			<otherwise>
+				group by merchant_code,merchant_name,expand_people,belongs_to) r order by week_rate asc,amount desc
+			</otherwise>
+		</choose>
+	</select>
+
+<!--	最近14天交易波动-->
+	<select id="getWeekDataDetail" resultType="org.jeecg.modules.data.entity.HalfMonthData" parameterType="java.lang.String">
+		select [id] as [key],trans_date as transDate,merchant_code as merchantCode,merchant_name as merchantName, expand_people as expandPeople,
+			belongs_to as  belongsTo,amount
+		from [TLZFMIS].dbo.half_month_data where merchant_code=#{merchantCode} order by trans_date asc
+	</select>
+
+
+</mapper>

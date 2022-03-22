@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.cloudacc.mapper.CloudAccRptMapper">
+
+    <!-- 近七日账户交易汇总 -->
+
+    <select id="cloudAccAppTransSummary"
+            parameterType="java.util.Map"
+            resultType="org.jeecg.modules.cloudacc.model.CloudAccAppTrxSummary" >
+
+        SELECT
+            app_id ,
+            app_name ,
+            #{beginDate} as begin_date,
+            #{endDate} as end_date,
+            sum(t.amount_total) as amount_total,
+            sum(t.order_total) as order_total,
+            sum(t.income_amount_total) as income_amount_total,
+            sum(t.income_order_total) as income_order_total,
+            sum(t.refund_amount_total) as refund_amount_total,
+            sum(t.refund_order_total) as refund_order_total,
+            sum(t.withdraw_amount_total) as withdraw_amount_total,
+            sum(t.withdraw_order_total) as withdraw_order_total
+        FROM cloud_acc_rpt t
+        where t.report_date between #{beginDate} and #{endDate}
+        <if test="appId != null">
+            and t.app_id like '%${appId}%'
+        </if>
+        <if test="appName != null">
+            and t.app_name like '%${appName}%'
+        </if>
+        group by app_id, app_name
+        order by sum(t.amount_total) desc;
+
+    </select>
+
+
+    <select id="topCloudAccAppTransSummary"
+            parameterType="java.util.Map"
+            resultType="org.jeecg.modules.cloudacc.model.CloudAccAppTrxSummary" >
+
+        SELECT
+        app_id ,
+        app_name ,
+        #{beginDate} as begin_date,
+        #{endDate} as end_date,
+        sum(t.amount_total) as amount_total,
+        sum(t.order_total) as order_total,
+        round(sum(t.income_amount_total)/10000,2) as income_amount_total,
+        sum(t.income_order_total) as income_order_total,
+        sum(t.refund_amount_total) as refund_amount_total,
+        sum(t.refund_order_total) as refund_order_total,
+        sum(t.withdraw_amount_total) as withdraw_amount_total,
+        sum(t.withdraw_order_total) as withdraw_order_total
+        FROM cloud_acc_rpt t
+        where t.report_date between #{beginDate} and #{endDate}
+        group by app_id, app_name
+        order by sum(t.income_amount_total) desc
+        limit #{limit};
+
+    </select>
+
+    <select id="cloudAccTransSummaryByDate"
+            parameterType="java.util.Map"
+            resultType="org.jeecg.modules.cloudacc.model.CloudAccTrxSummary" >
+        SELECT
+        t.report_date,
+        sum(t.amount_total) as amountTotal,
+        sum(t.order_total) as orderTotal,
+        round(sum(t.income_amount_total)/10000,2) as incomeAmountTotal,
+        sum(t.income_order_total) as incomeOrderTotal,
+        sum(t.refund_amount_total) as refundAmountTotal,
+        sum(t.refund_order_total) as refundOrderTotal,
+        sum(t.withdraw_amount_total) as withdrawAmountTotal,
+        sum(t.withdraw_order_total) as withdrawOrderTotal
+        FROM cloud_acc_rpt t
+        where t.report_date between #{beginDate} and #{endDate}
+        group by t.report_date
+        order by t.report_date;
+
+    </select>
+
+    <select id="cloudAccTrxSummaryByMonth"
+            parameterType="java.util.Map"
+            resultType="org.jeecg.modules.cloudacc.model.CloudAccTrxMonthSummary" >
+        SELECT
+        max(CONCAT(YEAR(t.report_date), concat('-', MONTH(t.report_date)))) as reportMonth,
+        sum(t.amount_total) as amountTotal,
+        sum(t.order_total) as orderTotal,
+        round(sum(t.income_amount_total)/10000,2) as incomeAmountTotal,
+        sum(t.income_order_total) as incomeOrderTotal,
+        sum(t.refund_amount_total) as refundAmountTotal,
+        sum(t.refund_order_total) as refundOrderTotal,
+        sum(t.withdraw_amount_total) as withdrawAmountTotal,
+        sum(t.withdraw_order_total) as withdrawOrderTotal
+        FROM cloud_acc_rpt t
+        where t.report_date between #{beginDate} and #{endDate}
+        group by YEAR(t.report_date), MONTH(t.report_date)
+        order by YEAR(t.report_date), MONTH(t.report_date);
+
+    </select>
+
+
+
+    <select id="cloudAccTransSummary"
+            parameterType="java.util.Map"
+            resultType="java.util.HashMap" >
+        SELECT
+            #{beginDate} as begin_date,
+            #{endDate} as end_date,
+            sum(t.amount_total) as amountTotal,
+            sum(t.order_total) as orderTotal,
+            sum(t.income_amount_total) as incomeAmountTotal,
+            sum(t.income_order_total) as incomeOrderTotal,
+            sum(t.refund_amount_total) as refundAmountTotal,
+            sum(t.refund_order_total) as refundOrderTotal,
+            sum(t.withdraw_amount_total) as withdrawAmountTotal,
+            sum(t.withdraw_order_total) as withdrawOrderTotal
+        FROM cloud_acc_rpt t
+        where t.report_date between #{beginDate} and #{endDate};
+
+    </select>
+</mapper>

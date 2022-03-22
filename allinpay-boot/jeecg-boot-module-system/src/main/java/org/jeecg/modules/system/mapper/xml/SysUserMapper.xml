@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.system.mapper.SysUserMapper">
+
+	<!-- 根据用户名查询 -->
+	<select id="getUserByName" resultType="org.jeecg.modules.system.entity.SysUser">
+		select * from  sys_user  where username = #{username} and del_flag = '0'
+	</select>
+
+	<!-- 根据部门Id查询 -->
+	<select id="getUserByDepId" resultType="org.jeecg.modules.system.entity.SysUser">
+		select * from sys_user where del_flag = '0' and id in (select user_id from sys_user_depart where dep_id=#{departId})
+		<if test="username!=null and username!=''">
+			and username = #{username}
+		</if>
+	</select>
+
+	<!-- 根据角色Id查询 -->
+	<select id="getUserByRoleId" resultType="org.jeecg.modules.system.entity.SysUser">
+		select * from sys_user where del_flag = '0' and id in (select user_id from sys_user_role where role_id=#{roleId})
+		<if test="username!=null and username!=''">
+			and username = #{username}
+		</if>
+	</select>
+	
+	<!--  修改用户部门code -->
+	<update id="updateUserDepart">
+		UPDATE sys_user SET org_code = #{orgCode} where username = #{username}
+	</update>
+
+	<!-- 根据手机号查询 -->
+	<select id="getUserByPhone"  resultType="org.jeecg.modules.system.entity.SysUser">
+		select * from  sys_user  where phone = #{phone} and del_flag = '0'
+	</select>
+	
+	<!-- 根据邮箱查询用户信息 -->
+	<select id="getUserByEmail" resultType="org.jeecg.modules.system.entity.SysUser">
+	select * from  sys_user  where email = #{email} and del_flag = '0'
+	</select>
+
+	<!-- SQL片段：getUserByOrgCode 的 FROM 和 WHERE 部分 -->
+	<sql id="getUserByOrgCodeFromSql">
+		FROM
+		sys_depart
+		-- 关联查询出该部门有哪些用户
+		INNER JOIN sys_user_depart ON sys_user_depart.dep_id = sys_depart.id
+		-- 关联查询出该用户的详细信息
+		INNER JOIN sys_user ON sys_user.id = sys_user_depart.user_id
+		WHERE
+		sys_depart.org_code LIKE '${orgCode}%'
+
+		<if test="userParams != null">
+			<if test="userParams.realname != null and userParams.realname != ''">
+				AND sys_user.realname LIKE '%${userParams.realname}%'
+			</if>
+			<if test="userParams.workNo != null and userParams.workNo != ''">
+				AND sys_user.work_no LIKE '%${userParams.workNo}%'
+			</if>
+		</if>
+	</sql>
+
+	<!-- 根据 orgCode 查询用户，包括子部门下的用户 -->
+	<select id="getUserByOrgCode" resultType="org.jeecg.modules.system.model.SysUserSysDepartModel">
+		SELECT
+			sys_user.id AS "sys_user.id",
+			sys_user.realname AS "sys_user.realname",
+			sys_user.work_no AS "sys_user.work_no",
+			sys_user.post AS "sys_user.post",
+			sys_user.telephone AS "sys_user.telephone",
+			sys_user.email AS "sys_user.email",
+			sys_user.phone AS "sys_user.phone",
+			sys_depart.id AS "sys_depart.id",
+			sys_depart.depart_name AS "sys_depart.depart_name"
+		<include refid="getUserByOrgCodeFromSql"/>
+		ORDER BY
+			sys_depart.org_code ASC
+	</select>
+
+	<!-- 查询 getUserByOrgCode 的总数-->
+	<select id="getUserByOrgCodeTotal" resultType="java.lang.Integer">
+		SELECT COUNT(1) <include refid="getUserByOrgCodeFromSql"/>
+	</select>
+
+	<!-- 查询部门-用户列表  手机端用户选择器使用 -->
+	<select id="phoneDepartUser" resultMap="phoneUserMap">
+		select d.id as did,d.depart_name as dlabel,d.depart_order as departOrder,
+		u.id as uid,u.username as username,u.realname as ulabel
+		from sys_depart d,sys_user u,sys_user_depart ud
+		where d.id=ud.dep_id and u.id=ud.user_id
+		order by depart_order desc
+	</select>
+	<resultMap id="phoneUserMap" type="org.jeecg.modules.system.entity.DepartmentUser">
+		<result property="id" column="did"/>
+		<result property="label" column="dlabel"/>
+		<result property="departOrder" column="departOrder"/>
+		
+		<collection property="children" ofType="org.jeecg.modules.system.entity.User">
+			<result property="id" column="uid"/>
+			<result property="username" column="username"/>
+			<result property="label" column="ulabel"/>
+		</collection>
+	</resultMap>
+	
+	<select id="getUserByUserName" parameterType="java.lang.String" resultType="org.jeecg.modules.system.entity.SysUser">
+		SELECT * FROM sys_user where username = #{username};
+	</select>
+</mapper>

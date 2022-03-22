@@ -1,0 +1,32 @@
+{
+  "message": "",
+  "result": [
+    {
+      "id": 1,
+      "name": "行业一部",
+      "avatar": "https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png"
+    },
+    {
+      "id": 2,
+      "name": "行业二部",
+      "avatar": "https://gw.alipayobjects.com/zos/rmsportal/cnrhVkzwxjPwAaCfPbdc.png"
+    },
+    {
+      "id": 1,
+      "name": "行业三部",
+      "avatar": "https://gw.alipayobjects.com/zos/rmsportal/gaOngJwsRYRaVAuXXcmB.png"
+    },
+    {
+      "id": 1,
+      "name": "技术创新部",
+      "avatar": "https://gw.alipayobjects.com/zos/rmsportal/ubnKSIfAJTxIgXOKlciN.png"
+    },
+    {
+      "id": 1,
+      "name": "综合部",
+      "avatar": "https://gw.alipayobjects.com/zos/rmsportal/WhxKECPNujWoWEFNdnJE.png"
+    }
+  ],
+  "status": 200,
+  "timestamp": 0
+}

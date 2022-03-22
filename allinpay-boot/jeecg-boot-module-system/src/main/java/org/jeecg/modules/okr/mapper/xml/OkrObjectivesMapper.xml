@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.okr.mapper.OkrObjectivesMapper">
+
+	<update id="updateTreeNodeStatus" parameterType="java.lang.String">
+		update okr_objectives set has_child = #{status} where id = #{id}
+	</update>
+
+	<select id="getPercent" parameterType="java.lang.String" resultType="org.jeecg.modules.okr.entity.OkrProgress">
+        select f1.projectOnline,
+        f2.finishOfIncome,
+        f2.finishOfTrading,
+        f2.tradingNum,
+        t1.tourismProjectOnline,
+        t2.tourismFinishOfIncome,
+        t2.tourismFinishOfTrading,
+        t2.tourismTradingNum from(
+        select round(count(p.project_name)*100/20,2) as projectOnline from (select distinct project_name from project_info where id &lt;&gt;'1240496202256531457') p) f1,
+        (select round(sum(company_income)/100/80,2) as finishOfIncome,
+        round(sum(transaction_money)/100/30000,2) as finishOfTrading,
+        round(sum(transaction_number)/100/10,2) as tradingNum
+        from day_trx_stat where transaction_date between #{startTime} and #{endTime}
+        and industry_type='0') f2,
+        (select round(count(distinct(merchant_code))/20,2) as tourismProjectOnline from day_trx_stat where transaction_date between #{startTime} and #{endTime}
+        and  industry_type='1') t1,
+        (select round(sum(company_income)/100/480,2) as tourismFinishOfIncome,
+        round(sum(transaction_money)/100/300000,2) as tourismFinishOfTrading,
+        round(sum(transaction_number)/50000,2) as tourismTradingNum
+        from day_trx_stat where transaction_date between #{startTime} and #{endTime}
+        and industry_type='1') t2
+	</select>
+
+</mapper>

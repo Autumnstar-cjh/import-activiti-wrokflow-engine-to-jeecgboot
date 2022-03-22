@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.tourism.mapper.TourismMerchantsMapper">
+
+    <select id="queryByIds" parameterType="java.lang.String" resultType="java.lang.String">
+
+        select merchant_code from tourism_merchants where id in
+        <foreach collection="ids.split(',')" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <insert id="addToMerchant" parameterType="java.util.List">
+        insert into merchant (id,code,name,project_id,industry_type)
+        values
+        <foreach collection="list" item="item" index= "index" separator =",">
+        (
+            #{item.id},
+            #{item.code},
+            #{item.name},
+            #{item.projectId},
+            #{item.industryType}
+         )
+        </foreach>
+    </insert>
+</mapper>

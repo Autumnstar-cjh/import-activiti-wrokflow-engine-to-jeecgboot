@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.quality.mapper.QualityMerchantTypeMapper">
+
+<!--    查询分页列表-->
+    <select id="queryPage" resultMap="pageMap">
+        select t.id as tid,t.type as type,m.id as mid,m.merchant_code as code,m.merchant_name as name,m.develop_people as people,m.department as department,m.is_new as isNew
+        from quality_merchant_type t
+        left join quality_merchant m
+        on t.id=m.type_id
+    </select>
+
+<!--    查询分页列表-带参数-->
+    <select id="queryPageByParam" resultMap="pageMap">
+        select t.id as tid,t.type as type,m.id as mid,m.merchant_code as code,m.merchant_name as name,m.develop_people as people,m.department as department,m.is_new as isNew
+        from quality_merchant_type t,quality_merchant m
+        where t.id=m.type_id
+        <if test="type != '' and code ==''">
+            and t.type=#{type}
+        </if>
+        <if test="type == '' and code != ''">
+            and m.merchant_code=#{code}
+        </if>
+        <if test="type != '' and code != ''">
+            and t.type=#{type} and m.merchant_code=#{code}
+        </if>
+    </select>
+
+    <resultMap id="pageMap" type="org.jeecg.modules.quality.vo.QualityMerchantTypePage">
+        <result property="id" column="tid"/>
+        <result property="type" column="type"/>
+
+        <collection property="qualityMerchantList" javaType="java.util.List" ofType="org.jeecg.modules.quality.entity.QualityMerchant">
+            <result property="id" column="mid"/>
+            <result property="merchantCode" column="code"/>
+            <result property="merchantName" column="name"/>
+            <result property="developPeople" column="people"/>
+            <result property="department" column="department"/>
+            <result property="isNew" column="isNew"/>
+        </collection>
+    </resultMap>
+</mapper>
