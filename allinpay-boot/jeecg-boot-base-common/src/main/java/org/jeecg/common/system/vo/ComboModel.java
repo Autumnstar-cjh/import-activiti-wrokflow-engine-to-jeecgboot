@@ -12,7 +12,8 @@ import java.io.Serializable;
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ComboModel implements Serializable {
-    private String id;
+
+    private static String id;
     private String title;
 
     public ComboModel(){
@@ -23,4 +24,15 @@ public class ComboModel implements Serializable {
         this.id = id;
         this.title = title;
     };
+
+    public static <K, T> K getUsername(T t) {
+        return (K) id;
+    }
+
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
 }
