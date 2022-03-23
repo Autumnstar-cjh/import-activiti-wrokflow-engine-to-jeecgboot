@@ -10,6 +10,8 @@ const service = axios.create({
   baseURL: '/jeecg-boot', // api base_url
   timeout: 600000 // 请求超时时间
 })
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+
 
 const err = (error) => {
   if (error.response) {
