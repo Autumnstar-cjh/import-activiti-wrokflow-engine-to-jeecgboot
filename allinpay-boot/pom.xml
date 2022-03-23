@@ -16,6 +16,7 @@
 	<modules>
 		<module>jeecg-boot-base-common</module>
 		<module>jeecg-boot-module-system</module>
+		<module>jeecg-boot-module-activiti</module>
 	</modules> 
 	
 	<distributionManagement>
@@ -68,6 +69,7 @@
 		<qc.cos.version>5.6.5</qc.cos.version>
 		<spring-boot-admin.version>2.2.0</spring-boot-admin.version>
 		<spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
+		<activiti.version>5.22.0</activiti.version>
     </properties>
     
 	<dependencies>
@@ -75,23 +77,28 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<version>2.1.3.RELEASE</version>
 		</dependency>
 		<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-mail</artifactId>
+			<version>2.1.3.RELEASE</version>
 		</dependency>
 		<dependency>
 	        <groupId>org.springframework.boot</groupId>
 	        <artifactId>spring-boot-starter-test</artifactId>
+			<version>2.1.3.RELEASE</version>
 	        <scope>test</scope>
 	    </dependency>
 	    <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
+			<version>2.1.3.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+			<version>2.1.3.RELEASE</version>
         </dependency>
 	    <!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -115,6 +122,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-freemarker</artifactId>
+			<version>2.1.3.RELEASE</version>
 		</dependency>
 		
 		<!-- Lombok -->
@@ -184,6 +192,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-quartz</artifactId>
+			<version>2.1.3.RELEASE</version>
         </dependency>
         
 		<!--JWT-->
@@ -265,7 +274,8 @@
 		<!-- Redis -->
 		<dependency>
 			 <groupId>org.springframework.boot</groupId>
-			  <artifactId>spring-boot-starter-data-redis</artifactId>
+			 <artifactId>spring-boot-starter-data-redis</artifactId>
+			 <version>2.1.3.RELEASE</version>
 		</dependency>
 		<dependency>
             <groupId>org.apache.commons</groupId>
@@ -279,12 +289,12 @@
 			<artifactId>codegenerate</artifactId>
 			<version>1.0.7</version>
 		</dependency>
-		
+
         <!-- AutoPoi Excel工具类-->
 		<dependency>
 			<groupId>org.jeecgframework</groupId>
 			<artifactId>autopoi-web</artifactId>
-			<version>1.0.4</version>
+			<version>1.3.5</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-codec</groupId>
@@ -322,6 +332,7 @@
 		<dependency>
 		   <groupId>org.springframework.boot</groupId>
 		   <artifactId>spring-boot-starter-websocket</artifactId>
+		   <version>2.1.3.RELEASE</version>
 		</dependency>
 
 		<dependency>
@@ -334,6 +345,7 @@
 			<artifactId>cos_api</artifactId>
 			<version>${qc.cos.version}</version>
 		</dependency>
+
 
 	</dependencies>
 
