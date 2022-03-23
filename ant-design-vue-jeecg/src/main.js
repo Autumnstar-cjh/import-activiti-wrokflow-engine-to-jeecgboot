@@ -20,6 +20,8 @@ import preview from 'vue-photo-preview'
 import 'vue-photo-preview/dist/skin.css'
 import "@jeecg/antd-online"
 import '@jeecg/antd-online/dist/OnlineForm.css'
+import qs from "qs"
+
 
 import {
   ACCESS_TOKEN,
@@ -41,6 +43,7 @@ import hasPermission from '@/utils/hasPermission'
 import vueBus from '@/utils/vueBus';
 import JeecgComponents from '@/components/jeecg/index'
 
+Vue.prototype.$qs = qs;
 Vue.config.productionTip = false
 Vue.use(Storage, config.storageOptions)
 Vue.use(Antd)

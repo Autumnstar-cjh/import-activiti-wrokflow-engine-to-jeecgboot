@@ -15,7 +15,8 @@ export function postAction(url,parameter) {
   return axios({
     url: url,
     method:'post' ,
-    data: parameter
+    data: parameter,
+    headers:{'Content-Type':'application/json'}
   })
 }
 
@@ -42,7 +43,7 @@ export function getAction(url,parameter) {
   return axios({
     url: url,
     method: 'get',
-    params: parameter
+    params: parameter,
   })
 }
 
