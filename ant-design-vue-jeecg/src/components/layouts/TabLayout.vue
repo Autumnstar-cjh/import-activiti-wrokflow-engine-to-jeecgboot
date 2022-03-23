@@ -36,6 +36,8 @@
   import Contextmenu from '@/components/menu/Contextmenu'
   import { mixin, mixinDevice } from '@/utils/mixin.js'
   import { triggerWindowResizeEvent } from '@/utils/util'
+  import { deleteAction, getAction,downFile,postAction } from '@/api/manage'
+
 
   const indexKey = '/dashboard/analysis'
 
