@@ -92,6 +92,7 @@
   import { triggerWindowResizeEvent } from '@/utils/util'
   import { mapState, mapActions } from 'vuex'
   import { mixin, mixinDevice } from '@/utils/mixin.js'
+  import { deleteAction, getAction,downFile,postAction } from '@/api/manage'
 
   export default {
     name: 'GlobalLayout',

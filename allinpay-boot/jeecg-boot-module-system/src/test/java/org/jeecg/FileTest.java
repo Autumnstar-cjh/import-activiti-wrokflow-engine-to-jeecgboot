@@ -1,16 +1,14 @@
 package org.jeecg;
 
-import cn.hutool.poi.excel.ExcelWriter;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellType;
 import org.junit.Test;
-import org.springframework.boot.ansi.AnsiOutput;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -211,7 +209,7 @@ public class FileTest {
                         String mapKey = titleRow.getCell(columnIndex).toString().trim();
 //                        System.out.println(mapKey);
                         HSSFCell cell = newRow.createCell(columnIndex);
-                        cell.setCellType(HSSFCell.ENCODING_UTF_16);
+                        cell.setCellType(CellType.forInt(HSSFCell.ENCODING_UTF_16));
                         System.out.println(map.get(mapKey));
                         cell.setCellValue(map.get(mapKey)==null ? null : map.get(mapKey).toString());
                     }
