@@ -1,14 +1,13 @@
 package org.jeecg.common.system.vo;
 
-import java.util.Date;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -47,6 +46,13 @@ public class LoginUser {
       * 当前登录部门code
       */
     private String orgCode;
+
+	/**
+	 * departIds
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private String departIds;
+
 	/**
 	 * 头像
 	 */
@@ -90,4 +96,8 @@ public class LoginUser {
 	 */
 	private Date createTime;
 
+
+	public String getDepartIds() {
+		return departIds;
+	}
 }
