@@ -93,7 +93,7 @@
 <script>
 
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
-import AllinpayUrgencyModal from '/Users/autumnstar/Downloads/allinpayboot/ant-design-vue-jeecg/src/views/liuzhuandan/modules/AllinpayUrgencyModal'
+import AllinpayUrgencyModal from '../../liuzhuandan/modules/AllinpayUrgencyModal'
 import pick from "lodash.pick";
 import { postAction,getAction } from '@/api/manage'
 
