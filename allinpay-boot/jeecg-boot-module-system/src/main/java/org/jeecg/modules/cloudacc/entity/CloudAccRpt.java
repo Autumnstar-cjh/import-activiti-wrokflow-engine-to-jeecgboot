@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.jeecg.modules.cloudacc.model.CloudAccOrderExcelModel;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.jeecgframework.poi.excel.annotation.Excel;
 import org.jeecg.common.aspect.annotation.Dict;
@@ -81,4 +82,51 @@ public class CloudAccRpt implements Serializable {
 	/**出金笔数*/
 	@Excel(name = "出金笔数", width = 15)
     private Integer withdrawOrderTotal;
+
+	public CloudAccRpt(){}
+
+	public CloudAccRpt(CloudAccOrderExcelModel excelModel){
+		this.id = excelModel.getId();
+		this.createBy = excelModel.getCreateBy();
+		this.createTime = excelModel.getCreateTime();
+		this.updateBy = excelModel.getUpdateBy();
+		this.updateTime = excelModel.getUpdateTime();
+		this.sysOrgCode = excelModel.getSysOrgCode();
+
+		this.appId = excelModel.getAppId();
+		this.appName = excelModel.getAppName();
+		this.reportDate = excelModel.getReportDate();
+		this.amountTotal = excelModel.getAmountTotal();
+		this.orderTotal = substringHandler(excelModel.getOrderTotal());
+
+		//入金金额 = 充值金额+消费金额+代收金额
+		this.incomeAmountTotal = excelModel.getPopupAmount() //充值金额
+				.add(excelModel.getConsAmount()) //消费金额
+				.add(excelModel.getCollAmount()) //代收金额
+				.add(excelModel.getAgrCollAmount()); //协议代收金额
+
+		//入金笔数 = 充值笔数+消费笔数+代收笔数
+		this.incomeOrderTotal = substringHandler(excelModel.getPopupNum())
+				+ substringHandler(excelModel.getConsNum())
+				+ substringHandler(excelModel.getCollNum())
+				+ substringHandler(excelModel.getAgrCollNum());
+
+		this.refundAmountTotal = excelModel.getRefundAmount(); //退款金额
+		this.refundOrderTotal = substringHandler(excelModel.getRefundNum()); //退款笔数
+
+		//出金金额 = 退款金额+提现金额，这里退款单独成一个字段，所以出金金额仅为提现金额
+		this.withdrawAmountTotal = excelModel.getWithdrAmount() //提现金额
+				.add(excelModel.getCrossAmount()); //跨境提现金额
+		//出金笔数
+		this.withdrawOrderTotal = substringHandler(excelModel.getWithdrNum())
+				+substringHandler(excelModel.getCrossNum());
+
+	}
+
+	public Integer substringHandler(String str){
+//		System.out.println("要处理的字符串："+str);
+		String filds =str.trim().substring(0,str.trim().length()-2);
+		Integer result = Integer.valueOf(filds);
+		return result;
+	}
 }

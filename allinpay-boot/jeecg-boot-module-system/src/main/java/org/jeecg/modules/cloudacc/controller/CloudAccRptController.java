@@ -270,7 +270,7 @@ public class CloudAccRptController extends JeecgController<CloudAccRpt, ICloudAc
     */
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
-        return super.importExcel(request, response, CloudAccRpt.class);
-    }
+		return super.importExcel(request, response, CloudAccRpt.class);
+	}
 
 }

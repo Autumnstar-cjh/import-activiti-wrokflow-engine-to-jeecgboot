@@ -9,7 +9,7 @@
         <dependency>
             <groupId>org.jeecg</groupId>
             <artifactId>easypoi-annotation</artifactId>
-            <version>2.4.0</version>
+            <version>4.4.0</version>
         </dependency>
 		<dependency>
 			<groupId>org.jeecgframework</groupId>
